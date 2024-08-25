@@ -79,12 +79,12 @@ st.markdown("""
 <style>
     /* Overall app background */
     .stApp {
-        background: linear-gradient(to bottom right, #2C3E50, #1E1E1E);
+        background: linear-gradient(to bottom right, #E0E5EC, #C2CCD6);
     }
     
     /* Text color and font */
     body {
-        color: #FFFFFF;
+        color: #2C3E50;  /* Changed to dark color for contrast */
         font-family: 'Arial', sans-serif;
     }
     
@@ -96,19 +96,19 @@ st.markdown("""
     
     /* Response container styling */
     .response-card {
-        background-color: #34495E;
-        color: #FFFFFF;
+        background-color: #FFFFFF;
+        color: #2C3E50;
         border-radius: 10px;
         padding: 20px;
         margin: 20px 0;
-        border: 1px solid #4A5568;
+        border: 1px solid #BDC3C7;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
     /* Style the hint text */
     .hint-text {
-        background-color: #2C3E50;
-        color: #FFFFFF;
+        background-color: #ECF0F1;
+        color: #2C3E50;
         border-radius: 10px;
         padding: 15px;
         margin-top: 20px;
@@ -124,12 +124,10 @@ st.markdown("""
         padding: 10px 20px;
     }
     
-    /* Sidebar background color and text */
-    .css-1d391kg {
-        background-color: #3E5871;
-    }
-    .css-1d391kg .stRadio label {
-        color: #FFFFFF;
+    /* Sidebar background color */
+    .stSidebar {
+        background-color: #D6DCE5;
+        color: #2C3E50;
     }
     
     /* Header styling with gradient and animation */
@@ -154,8 +152,8 @@ st.markdown("""
     
     /* Footer styling */
     .footer {
-        background: linear-gradient(45deg, #2C3E50, #34495E);
-        color: #ECF0F1;
+        background: linear-gradient(45deg, #BDC3C7, #95A5A6);
+        color: #2C3E50;
         text-align: center;
         padding: 10px;
         position: fixed;
@@ -204,32 +202,33 @@ st.markdown("""
 
     .stTabs [data-baseweb="tab"] {
         height: 50px;
-        background-color: #2C3E50;
-        color: white;
+        background-color: #D6DCE5;
+        color: #2C3E50;
         border-radius: 5px 5px 0 0;
     }
 
     .stTabs [aria-selected="true"] {
         background-color: #3498DB;
+        color: white;
     }
 
     /* Previous responses and question/answer headings */
     .response-card h4 {
-        color: #FFFFFF;
+        color: #2C3E50;
     }
 
     /* Input area styling */
     .stTextArea textarea {
-        background-color: #3E5871;
-        color: #FFFFFF;
-        border: 1px solid #4A5568;
+        background-color: #FFFFFF;
+        color: #2C3E50;
+        border: 1px solid #BDC3C7;
     }
 
     /* File uploader styling */
     .stFileUploader {
-        background-color: #3E5871;
-        color: #FFFFFF;
-        border: 1px solid #4A5568;
+        background-color: #FFFFFF;
+        color: #2C3E50;
+        border: 1px solid #BDC3C7;
         border-radius: 5px;
         padding: 10px;
     }
@@ -247,11 +246,11 @@ st.markdown("<h1 class='main-header'>AI Study Assistant</h1>", unsafe_allow_html
 st.markdown("<h2 class='sub-header'>Welcome! How can we help you today?</h2>", unsafe_allow_html=True)
 
 # Create tabs for different input types
-text_tab, image_tab, pdf_tab = st.tabs(["Text", "Image", "PDF"])
+text_tab, image_tab, pdf_tab = st.tabs(["Text Input", "Image Input", "PDF Input"])
 
 with text_tab:
     user_input = st.text_area("Enter your question:")
-    if st.button("Get Hint"):
+    if st.button("Get Hint (Text)"):
         with st.spinner("Processing..."):
             if user_input:
                 hint = get_ai_response(user_input, topic_type)
@@ -279,7 +278,7 @@ with text_tab:
 
 with image_tab:
     image_file = st.file_uploader("Upload image file", type=["png", "jpg", "jpeg"])
-    if st.button("Get Hint"):
+    if st.button("Get Hint (Image)"):
         with st.spinner("Processing..."):
             if image_file:
                 text = process_image(image_file)
@@ -311,7 +310,7 @@ with image_tab:
 
 with pdf_tab:
     pdf_file = st.file_uploader("Upload PDF file", type=["pdf"])
-    if st.button("Get Hint"):
+    if st.button("Get Hint (PDF)"):
         with st.spinner("Processing..."):
             if pdf_file:
                 text = extract_text_from_pdf(pdf_file)
