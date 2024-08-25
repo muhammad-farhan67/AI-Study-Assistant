@@ -84,7 +84,7 @@ st.markdown("""
     
     /* Text color and font */
     body {
-        color: #E0E0E0;
+        color: #FFFFFF;
         font-family: 'Arial', sans-serif;
     }
     
@@ -97,7 +97,7 @@ st.markdown("""
     /* Response container styling */
     .response-card {
         background-color: #34495E;
-        color: #FFFFFF;  /* Ensure chat text is visible */
+        color: #FFFFFF;
         border-radius: 10px;
         padding: 20px;
         margin: 20px 0;
@@ -108,7 +108,7 @@ st.markdown("""
     /* Style the hint text */
     .hint-text {
         background-color: #2C3E50;
-        color: #FFFFFF;  /* Ensure the text is visible */
+        color: #FFFFFF;
         border-radius: 10px;
         padding: 15px;
         margin-top: 20px;
@@ -124,10 +124,12 @@ st.markdown("""
         padding: 10px 20px;
     }
     
-    /* Sidebar background color */
-    .stSidebar {
-        background-color: #2E2E2E;  /* Set this to a greyish color */
-        color: #FFFFFF;  /* Make sidebar text white */
+    /* Sidebar background color and text */
+    .css-1d391kg {
+        background-color: #3E5871;
+    }
+    .css-1d391kg .stRadio label {
+        color: #FFFFFF;
     }
     
     /* Header styling with gradient and animation */
@@ -193,6 +195,43 @@ st.markdown("""
         to {
             opacity: 1;
         }
+    }
+
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        background-color: #2C3E50;
+        color: white;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background-color: #3498DB;
+    }
+
+    /* Previous responses and question/answer headings */
+    .response-card h4 {
+        color: #FFFFFF;
+    }
+
+    /* Input area styling */
+    .stTextArea textarea {
+        background-color: #3E5871;
+        color: #FFFFFF;
+        border: 1px solid #4A5568;
+    }
+
+    /* File uploader styling */
+    .stFileUploader {
+        background-color: #3E5871;
+        color: #FFFFFF;
+        border: 1px solid #4A5568;
+        border-radius: 5px;
+        padding: 10px;
     }
 
 </style>
