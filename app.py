@@ -45,7 +45,9 @@ def extract_text_from_pdf(pdf_file):
 
 def get_ai_response(input_text, topic_type):
     try:
-        system_message = "You are an AI study assistant. Provide hints and approaches to solve problems, but don't give exact answers. "
+        system_message = """you are an AI study assistant. Provide hints and approaches to solve problems, but don't give exact answers. 
+        When crafting your response, consider the following prompts and guidelines:the answershould be versatile and arises curiosity in the user and do not reveal the exact answers give them hints to solve a particular solution . you should tell them that you could not give them exact anwer if they demand .
+        Ensure each hint is unique and encourages critical thinking. Focus on {topic_type}-related """
         if topic_type == "Coding":
             system_message += "Focus on coding-related topics and provide specific coding hints."
         elif topic_type == "Math":
