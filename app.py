@@ -6,33 +6,22 @@ from PIL import Image
 import io
 import requests
 import time
-import speech_recognition as sr
 import fitz  # PyMuPDF
 
-# Initialize session state
-if 'previous_responses' not in st.session_state:
-    st.session_state.previous_responses = []
+# Initialize session state for each input type
+if 'text_responses' not in st.session_state:
+    st.session_state.text_responses = []
+if 'image_responses' not in st.session_state:
+    st.session_state.image_responses = []
+if 'pdf_responses' not in st.session_state:
+    st.session_state.pdf_responses = []
 
 # Initialize Groq client
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
+
 # Initialize OCR
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path for Windows
-
-# Granite API for coding and math
-# GRANITE_API_KEY = os.environ.get("GRANITE_API_KEY")
-# GRANITE_API_URL = "https://api.granite.ai/v1/chat/completions"
-
-def process_voice(audio_file):
-    try:
-        recognizer = sr.Recognizer()
-        with sr.AudioFile(audio_file) as source:
-            audio = recognizer.record(source)
-        text = recognizer.recognize_google(audio)
-        return text
-    except Exception as e:
-        st.error(f"Error processing voice input: {str(e)}")
-        return None
 
 def process_image(image_file):
     try:
@@ -43,7 +32,6 @@ def process_image(image_file):
         st.error(f"Error processing image: {str(e)}")
         return None
 
-# Replace the old PDF processing function with PyMuPDF
 def extract_text_from_pdf(pdf_file):
     try:
         text = ""
@@ -56,45 +44,35 @@ def extract_text_from_pdf(pdf_file):
         st.error(f"Error processing PDF: {str(e)}")
         return None
 
-def get_ai_response(input_text, model="llama3-8b-8192"):
+def get_ai_response(input_text, topic_type):
     try:
+        system_message = "You are an AI study assistant. Provide hints and approaches to solve problems, but don't give exact answers. "
+        if topic_type == "Coding":
+            system_message += "Focus on coding-related topics and provide specific coding hints."
+        elif topic_type == "Math":
+            system_message += "Focus on math-related topics and provide specific mathematical hints."
+        elif topic_type == "Science":
+            system_message += "Focus on science-related topics and provide specific scientific hints."
+        else:
+            system_message += "Focus on general education-related topics."
+
         chat_completion = client.chat.completions.create(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an AI study assistant. Provide hints and approaches to solve problems, but don't give exact answers. Focus on education-related topics."
+                    "content": system_message
                 },
                 {
                     "role": "user",
                     "content": input_text,
                 }
             ],
-            model=model,
+            model="llama3-8b-8192",
         )
         return chat_completion.choices[0].message.content
     except Exception as e:
         st.error(f"Error getting AI response: {str(e)}")
         return None
-
-# def get_granite_response(input_text):
-#     try:
-#         headers = {
-#             "Content-Type": "application/json",
-#             "Authorization": f"Bearer {GRANITE_API_KEY}"
-#         }
-#         data = {
-#             "model": "granite-v1",
-#             "messages": [
-#                 {"role": "system", "content": "You are a coding and math assistant. Provide hints and approaches, not full solutions."},
-#                 {"role": "user", "content": input_text}
-#             ]
-#         }
-#         response = requests.post(GRANITE_API_URL, headers=headers, json=data)
-#         response.raise_for_status()
-#         return response.json()['choices'][0]['message']['content']
-#     except Exception as e:
-#         st.error(f"Error getting Granite response: {str(e)}")
-#         return None
 
 # Streamlit UI
 st.set_page_config(page_title="AI Study Assistant", page_icon="📚", layout="wide")
@@ -145,88 +123,179 @@ st.markdown("""
         padding: 10px 20px;
     }
     
-    /* Header styling */
-    h1, h2, h3 {
-        color: #3498DB;
+    /* Header styling with gradient and animation */
+    .main-header {
+        background: linear-gradient(45deg, #3498DB, #2980B9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 3em;
         text-align: center;
+        animation: fadeInDown 1s ease-out;
+    }
+    
+    /* Subheader styling with gradient and animation */
+    .sub-header {
+        background: linear-gradient(45deg, #E74C3C, #C0392B);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 1.5em;
+        text-align: center;
+        animation: fadeInUp 1s ease-out;
+    }
+    
+    /* Footer styling */
+    .footer {
+        background: linear-gradient(45deg, #2C3E50, #34495E);
+        color: #ECF0F1;
+        text-align: center;
+        padding: 10px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        left: 0;
+        animation: fadeIn 1s ease-out;
+    }
+    
+    /* Keyframe animations */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
     }
 
-    /* Divider between responses */
-    .response-divider {
-        border-top: 1px solid #4A5568;
-        margin: 20px 0;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-
 # Sidebar
-st.sidebar.image("eduai.png", width=250)
-# st.sidebar.title("Options")
-input_type = st.sidebar.radio("Choose input type:", ("Text", "Voice", "Image", "PDF"))
-topic_type = st.sidebar.radio("Topic type:", ("General", "Coding/Math"))
+st.sidebar.image("Q.png", width=250)
+topic_type = st.sidebar.radio("Topic type:", ("General", "Coding", "Math", "Science"))
 
 # Main content
 st.markdown("<h1 class='main-header'>AI Study Assistant</h1>", unsafe_allow_html=True)
 st.markdown("<h2 class='sub-header'>Welcome! How can we help you today?</h2>", unsafe_allow_html=True)
 
-if input_type == "Text":
+# Create tabs for different input types
+text_tab, image_tab, pdf_tab = st.tabs(["Text Input", "Image Input", "PDF Input"])
+
+with text_tab:
     user_input = st.text_area("Enter your question:")
-elif input_type == "Voice":
-    audio_file = st.file_uploader("Upload audio file", type=["wav"])
-elif input_type == "Image":
-    image_file = st.file_uploader("Upload image file", type=["png", "jpg", "jpeg"])
-elif input_type == "PDF":
-    pdf_file = st.file_uploader("Upload PDF file", type=["pdf"])
-
-if st.button("Get Hint"):
-    with st.spinner("Processing..."):
-        if input_type == "Text" and user_input:
-            text = user_input
-        elif input_type == "Voice" and audio_file:
-            text = process_voice(audio_file)
-        elif input_type == "Image" and image_file:
-            text = process_image(image_file)
-        elif input_type == "PDF" and pdf_file:
-            text = extract_text_from_pdf(pdf_file)  # Updated to use PyMuPDF for PDF extraction
-        else:
-            st.warning("Please provide input based on the selected type.")
-            st.stop()
-
-        if text:
+    if st.button("Get Hint (Text)"):
+        with st.spinner("Processing..."):
+            if user_input:
+                hint = get_ai_response(user_input, topic_type)
+                if hint:
+                    st.markdown("<div class='response-card'>", unsafe_allow_html=True)
+                    st.markdown("### Hint:")
+                    st.markdown(f'<div class="hint-text">{hint}</div>', unsafe_allow_html=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    st.session_state.text_responses.append((user_input, hint))
+            else:
+                st.warning("Please enter a question.")
+    
+    # Display text chat history
+    if st.session_state.text_responses:
+        st.markdown("### Previous Text Responses:")
+        for i, (question, answer) in enumerate(reversed(st.session_state.text_responses), 1):
             st.markdown("<div class='response-card'>", unsafe_allow_html=True)
-            st.markdown("### Processed text:")
-            st.write(text)
-            
-            if topic_type == "General":
-                hint = get_ai_response(text)
-            # else:
-            #     hint = get_granite_response(text)
-            
-            if hint:
-                st.markdown("### Hint:")
-                st.markdown(f'<div class="hint-text">{hint}</div>', unsafe_allow_html=True)
-            
+            st.markdown(f"<h4>Question {i}:</h4>", unsafe_allow_html=True)
+            st.write(question)
+            st.markdown(f"<h4>Answer {i}:</h4>", unsafe_allow_html=True)
+            st.markdown(f'<div class="hint-text">{answer}</div>', unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
-            
-            # Add to session state
-            st.session_state.previous_responses.append((text, hint))
+            if i < len(st.session_state.text_responses):
+                st.markdown("<div class='response-divider'></div>", unsafe_allow_html=True)
 
-# Display previous responses
-if st.session_state.previous_responses:
-    st.markdown("### Previous Responses:")
-    for i, (question, answer) in enumerate(reversed(st.session_state.previous_responses[:-1]), 1):
-        st.markdown("<div class='response-card'>", unsafe_allow_html=True)
-        st.markdown(f"<h4>Question {i}:</h4>", unsafe_allow_html=True)
-        st.write(question)
-        st.markdown(f"<h4>Answer {i}:</h4>", unsafe_allow_html=True)
-        st.markdown(f'<div class="hint-text">{answer}</div>', unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-        if i < len(st.session_state.previous_responses) - 1:
-            st.markdown("<div class='response-divider'></div>", unsafe_allow_html=True)
+with image_tab:
+    image_file = st.file_uploader("Upload image file", type=["png", "jpg", "jpeg"])
+    if st.button("Get Hint (Image)"):
+        with st.spinner("Processing..."):
+            if image_file:
+                text = process_image(image_file)
+                if text:
+                    hint = get_ai_response(text, topic_type)
+                    if hint:
+                        st.markdown("<div class='response-card'>", unsafe_allow_html=True)
+                        st.markdown("### Processed text:")
+                        st.write(text)
+                        st.markdown("### Hint:")
+                        st.markdown(f'<div class="hint-text">{hint}</div>', unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
+                        st.session_state.image_responses.append((text, hint))
+            else:
+                st.warning("Please upload an image.")
+    
+    # Display image chat history
+    if st.session_state.image_responses:
+        st.markdown("### Previous Image Responses:")
+        for i, (question, answer) in enumerate(reversed(st.session_state.image_responses), 1):
+            st.markdown("<div class='response-card'>", unsafe_allow_html=True)
+            st.markdown(f"<h4>Processed Text {i}:</h4>", unsafe_allow_html=True)
+            st.write(question)
+            st.markdown(f"<h4>Answer {i}:</h4>", unsafe_allow_html=True)
+            st.markdown(f'<div class="hint-text">{answer}</div>', unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+            if i < len(st.session_state.image_responses):
+                st.markdown("<div class='response-divider'></div>", unsafe_allow_html=True)
+
+with pdf_tab:
+    pdf_file = st.file_uploader("Upload PDF file", type=["pdf"])
+    if st.button("Get Hint (PDF)"):
+        with st.spinner("Processing..."):
+            if pdf_file:
+                text = extract_text_from_pdf(pdf_file)
+                if text:
+                    hint = get_ai_response(text, topic_type)
+                    if hint:
+                        st.markdown("<div class='response-card'>", unsafe_allow_html=True)
+                        st.markdown("### Processed text:")
+                        st.write(text[:500] + "..." if len(text) > 500 else text)  # Show first 500 characters
+                        st.markdown("### Hint:")
+                        st.markdown(f'<div class="hint-text">{hint}</div>', unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
+                        st.session_state.pdf_responses.append((text, hint))
+            else:
+                st.warning("Please upload a PDF file.")
+    
+    # Display PDF chat history
+    if st.session_state.pdf_responses:
+        st.markdown("### Previous PDF Responses:")
+        for i, (question, answer) in enumerate(reversed(st.session_state.pdf_responses), 1):
+            st.markdown("<div class='response-card'>", unsafe_allow_html=True)
+            st.markdown(f"<h4>Processed Text {i}:</h4>", unsafe_allow_html=True)
+            st.write(question[:500] + "..." if len(question) > 500 else question)  # Show first 500 characters
+            st.markdown(f"<h4>Answer {i}:</h4>", unsafe_allow_html=True)
+            st.markdown(f'<div class="hint-text">{answer}</div>', unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+            if i < len(st.session_state.pdf_responses):
+                st.markdown("<div class='response-divider'></div>", unsafe_allow_html=True)
 
 # Footer
-st.markdown("© 2024 AI Study Assistant. All rights reserved.")
+st.markdown("<div class='footer'>© 2024 AI Study Assistant. All rights reserved.</div>", unsafe_allow_html=True)
 
 # Progress bar in sidebar
 progress_bar = st.sidebar.progress(0)
