@@ -247,11 +247,11 @@ st.markdown("<h1 class='main-header'>AI Study Assistant</h1>", unsafe_allow_html
 st.markdown("<h2 class='sub-header'>Welcome! How can we help you today?</h2>", unsafe_allow_html=True)
 
 # Create tabs for different input types
-text_tab, image_tab, pdf_tab = st.tabs(["Text Input", "Image Input", "PDF Input"])
+text_tab, image_tab, pdf_tab = st.tabs(["Text", "Image", "PDF"])
 
 with text_tab:
     user_input = st.text_area("Enter your question:")
-    if st.button("Get Hint (Text)"):
+    if st.button("Get Hint"):
         with st.spinner("Processing..."):
             if user_input:
                 hint = get_ai_response(user_input, topic_type)
@@ -279,7 +279,7 @@ with text_tab:
 
 with image_tab:
     image_file = st.file_uploader("Upload image file", type=["png", "jpg", "jpeg"])
-    if st.button("Get Hint (Image)"):
+    if st.button("Get Hint"):
         with st.spinner("Processing..."):
             if image_file:
                 text = process_image(image_file)
@@ -311,7 +311,7 @@ with image_tab:
 
 with pdf_tab:
     pdf_file = st.file_uploader("Upload PDF file", type=["pdf"])
-    if st.button("Get Hint (PDF)"):
+    if st.button("Get Hint"):
         with st.spinner("Processing..."):
             if pdf_file:
                 text = extract_text_from_pdf(pdf_file)
