@@ -1,5 +1,4 @@
-```markdown
-# AI Study Assistant 🤖📚
+# ThinkQuest 🤖📚
 
 An intelligent study companion powered by AI to help students with various subjects and topics.
 
