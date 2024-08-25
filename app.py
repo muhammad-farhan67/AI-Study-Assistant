@@ -19,7 +19,6 @@ if 'pdf_responses' not in st.session_state:
 # Initialize Groq client
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
-
 # Initialize OCR
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path for Windows
 
@@ -98,6 +97,7 @@ st.markdown("""
     /* Response container styling */
     .response-card {
         background-color: #34495E;
+        color: #FFFFFF;  /* Ensure chat text is visible */
         border-radius: 10px;
         padding: 20px;
         margin: 20px 0;
@@ -108,6 +108,7 @@ st.markdown("""
     /* Style the hint text */
     .hint-text {
         background-color: #2C3E50;
+        color: #FFFFFF;  /* Ensure the text is visible */
         border-radius: 10px;
         padding: 15px;
         margin-top: 20px;
@@ -121,6 +122,12 @@ st.markdown("""
         border: none;
         border-radius: 5px;
         padding: 10px 20px;
+    }
+    
+    /* Sidebar background color */
+    .stSidebar {
+        background-color: #2E2E2E;  /* Set this to a greyish color */
+        color: #FFFFFF;  /* Make sidebar text white */
     }
     
     /* Header styling with gradient and animation */
@@ -189,6 +196,7 @@ st.markdown("""
     }
 
 </style>
+
 """, unsafe_allow_html=True)
 
 # Sidebar
